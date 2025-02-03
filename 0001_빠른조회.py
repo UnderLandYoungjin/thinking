@@ -36,138 +36,6 @@ def get_access_token():
     res = requests.post(URL, headers=headers, data=json.dumps(body))
     return res.json().get("access_token", "")
 
-def hashkey(datas):
-    """해시키 생성"""
-    PATH = "uapi/hashkey"
-    URL = f"{URL_BASE}/{PATH}"
-    headers = {
-        'content-Type': 'application/json',
-        'appKey': APP_KEY,
-        'appSecret': APP_SECRET,
-    }
-    res = requests.post(URL, headers=headers, data=json.dumps(datas))
-    return res.json()["HASH"]
-
-def get_stock_data(code):
-    """현재가 및 상세 주식 정보 조회"""
-    PATH = "uapi/domestic-stock/v1/quotations/inquire-price"
-    URL = f"{URL_BASE}/{PATH}"
-    headers = {
-        "Content-Type": "application/json",
-        "authorization": f"Bearer {ACCESS_TOKEN}",
-        "appKey": APP_KEY,
-        "appSecret": APP_SECRET,
-        "tr_id": "FHKST01010100"
-    }
-    params = {
-        "fid_cond_mrkt_div_code": "J",
-        "fid_input_iscd": code,
-    }
-    
-    res = requests.get(URL, headers=headers, params=params)
-    response_json = res.json()
-    
-    if 'output' in response_json:
-        return response_json["output"]
-    else:
-        print(f"Error: 종목 코드 {code}의 'output' 데이터 없음")
-        return None
-
-def buy(code="005930", qty="1"):
-    """주식 시장가 매수"""
-    PATH = "uapi/domestic-stock/v1/trading/order-cash"
-    URL = f"{URL_BASE}/{PATH}"
-    data = {
-        "CANO": CANO,
-        "ACNT_PRDT_CD": ACNT_PRDT_CD,
-        "PDNO": code,
-        "ORD_DVSN": "01",
-        "ORD_QTY": str(int(qty)),
-        "ORD_UNPR": "0",
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "authorization": f"Bearer {ACCESS_TOKEN}",
-        "appKey": APP_KEY,
-        "appSecret": APP_SECRET,
-        "tr_id": "TTTC0802U",
-        "custtype": "P",
-        "hashkey": hashkey(data)
-    }
-    res = requests.post(URL, headers=headers, data=json.dumps(data))
-    if res.json()['rt_cd'] == '0':
-        print(f"[매수 성공]{str(res.json())}")
-        return True
-    else:
-        print(f"[매수 실패]{str(res.json())}")
-        return False
-
-def sell(code="005930", qty="1"):
-    """주식 시장가 매도"""
-    PATH = "uapi/domestic-stock/v1/trading/order-cash"
-    URL = f"{URL_BASE}/{PATH}"
-    data = {
-        "CANO": CANO,
-        "ACNT_PRDT_CD": ACNT_PRDT_CD,
-        "PDNO": code,
-        "ORD_DVSN": "01",
-        "ORD_QTY": qty,
-        "ORD_UNPR": "0",
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "authorization": f"Bearer {ACCESS_TOKEN}",
-        "appKey": APP_KEY,
-        "appSecret": APP_SECRET,
-        "tr_id": "TTTC0801U",
-        "custtype": "P",
-        "hashkey": hashkey(data)
-    }
-    res = requests.post(URL, headers=headers, data=json.dumps(data))
-    if res.json()['rt_cd'] == '0':
-        print(f"[매도 성공]{str(res.json())}")
-        return True
-    else:
-        print(f"[매도 실패]{str(res.json())}")
-        return False
-
-def get_balance_inquire():
-    """계좌 잔고 조회"""
-    PATH = "/uapi/domestic-stock/v1/trading/inquire-balance"
-    URL = f"{URL_BASE}/{PATH}"
-    headers = {
-        "Content-Type": "application/json",
-        "authorization": f"Bearer {ACCESS_TOKEN}",
-        "appKey": APP_KEY,
-        "appSecret": APP_SECRET,
-        "tr_id": "TTTC8434R"
-    }
-    params = {
-        "CANO": CANO,
-        "ACNT_PRDT_CD": ACNT_PRDT_CD,
-        "AFHR_FLPR_YN": "N",
-        "OFL_YN": "",
-        "INQR_DVSN": "02",
-        "UNPR_DVSN": "01",
-        "FUND_STTL_ICLD_YN": "N",
-        "FNCG_AMT_AUTO_RDPT_YN": "N",
-        "PRCS_DVSN": "01",
-        "CTX_AREA_FK100": "",
-        "CTX_AREA_NK100": ""
-    }
-    res = requests.get(URL, headers=headers, params=params)
-    stock_list = res.json()['output1']
-    stock_dict = {}
-    for stock in stock_list:
-        if int(stock['hldg_qty']) > 0:
-            stock_dict[stock['pdno']] = [
-                stock['prdt_name'],
-                stock['hldg_qty'],
-                stock['pchs_avg_pric'],
-                stock['prpr']
-            ]
-    return stock_dict
-
 # 조회할 종목 리스트
 itm_no_dict = {
     "005930": "삼성전자",
@@ -294,6 +162,31 @@ itm_no_dict = {
     "002380": "KCC"
 }
 
+def get_stock_data(code):
+    """현재가 및 상세 주식 정보 조회"""
+    PATH = "uapi/domestic-stock/v1/quotations/inquire-price"
+    URL = f"{URL_BASE}/{PATH}"
+    headers = {
+        "Content-Type": "application/json",
+        "authorization": f"Bearer {ACCESS_TOKEN}",
+        "appKey": APP_KEY,
+        "appSecret": APP_SECRET,
+        "tr_id": "FHKST01010100"
+    }
+    params = {
+        "fid_cond_mrkt_div_code": "J",
+        "fid_input_iscd": code,
+    }
+    
+    res = requests.get(URL, headers=headers, params=params)
+    response_json = res.json()
+    
+    if 'output' in response_json:
+        return response_json["output"]
+    else:
+        print(f"Error: 종목 코드 {code}의 'output' 데이터 없음")
+        return None
+
 # API 토큰 발급
 ACCESS_TOKEN = get_access_token()
 
@@ -320,9 +213,6 @@ def format_number(value, format_type='number'):
             return f"{int(value):,}"
     except:
         return value
-
-# 보유 종목 조회
-my_poket_all = get_balance_inquire()
 
 while True:
     print(f"\n🔄 주식 데이터 조회 시작... ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
@@ -361,42 +251,5 @@ while True:
         print(df.to_string(justify='right'))
         print("+" + "-"*80 + "+")
     
-    # 매수 조건 검사
-    for code, name in itm_no_dict.items():
-        stock_data = get_stock_data(code)
-        if stock_data:
-            current_price = int(stock_data['stck_prpr'])
-            prev_price = int(stock_data['prdy_vrss'])
-            diff_a = ((current_price / prev_price) - 1) * 100
-
-            if code in my_poket_all:
-                print(f"{'='*50}\n{name}은(는) 이미 보유 중이므로 매수를 건너뛴다.\n{'='*50}")
-                continue
-
-            if 0.5 <= diff_a <= 0.9:
-                print(f"{'='*50}\n{name}이(가) 조건에 부합하여 매수를 시도한다.\n{'='*50}")
-                buy(code, 1)
-            
-            else:
-                print(f"{'='*50}\n{name}은(는) 매수 조건에 부합하지 않습니다.\n{'='*50}")
-
-    # 매도 조건 검사
-    for code, values in my_poket_all.items():
-        name = values[0]
-        qty = int(values[1])
-        purchase_price = float(values[2])
-        current_price = float(values[3])
-        margin_rate = ((current_price / purchase_price) - 1) * 100
-
-        print(f"({code}): ({name})의 수익률은 {margin_rate:.3f}%이다.")
-        if margin_rate >= 2.1:
-            print(f"{name}이(가) 이익이 발생하여 매도를 시도한다.")
-            sell(code, qty)
-        elif margin_rate <= -0.7:
-            print(f"{name}이(가) 손실이 발생하여 손절 매도를 시도한다.")
-            sell(code, qty)
-        else:
-            print("매도 조건에 부합하지 않으므로 넘어간다.")
-
     print(f"\n⏳ 10초 대기 중...")
     time.sleep(10)

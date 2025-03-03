@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>재미있는 팀 나누기</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            margin-top: 0;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: colorChange 5s infinite alternate;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        label {
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        
+        input {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+            width: 80px;
+        }
+        
+        input:focus {
+            background-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #FF512F, #DD2476);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #result {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        
+        .team {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 150px;
+            min-height: 100px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s forwards;
+            transition: all 0.3s;
+        }
+        
+        .team.highlight {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .team h2 {
+            margin-top: 0;
+            color: #FFD700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .member {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            animation: slideIn 0.5s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        #nameInput {
+            width: 200px;
+        }
+        
+        .names-container {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .name-tag {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 15px;
+            animation: pop 0.3s forwards;
+            display: flex;
+            align-items: center;
+        }
+        
+        .name-tag button {
+            background: rgba(255, 100, 100, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin-left: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        @keyframes colorChange {
+            0% { color: #FFD700; }
+            25% { color: #FF6B6B; }
+            50% { color: #4ECDC4; }
+            75% { color: #FF8C00; }
+            100% { color: #7FDBFF; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .visible-member {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        
+        .visible-member:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .error {
+            color: #FF6B6B;
+            animation: shake 0.5s;
+            margin: 10px 0;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f;
+            opacity: 0.7;
+            top: 0;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 재미있는 팀 나누기 ✨</h1>
+        
+        <div class="input-method">
+            <div class="input-group">
+                <label for="teamCount">팀 개수:</label>
+                <input type="number" id="teamCount" min="2" max="10" value="2">
+                
+                <label for="totalCount">총 인원:</label>
+                <input type="number" id="totalCount" min="2" value="10">
+            </div>
+            
+            <button id="autoGenerate">자동 생성하기</button>
+            
+            <div>
+                <p>또는 직접 이름을 입력해보세요:</p>
+                <div class="input-group">
+                    <input type="text" id="nameInput" placeholder="이름 입력 후 엔터">
+                    <button id="addName">추가</button>
+                </div>
+            </div>
+            
+            <div class="names-container" id="namesContainer"></div>
+            
+            <button id="generateTeams">팀 나누기 시작!</button>
+        </div>
+        
+        <div id="error" class="error" style="display:none;"></div>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        const teamCountInput = document.getElementById('teamCount');
+        const totalCountInput = document.getElementById('totalCount');
+        const nameInput = document.getElementById('nameInput');
+        const addNameBtn = document.getElementById('addName');
+        const namesContainer = document.getElementById('namesContainer');
+        const autoGenerateBtn = document.getElementById('autoGenerate');
+        const generateTeamsBtn = document.getElementById('generateTeams');
+        const resultContainer = document.getElementById('result');
+        const errorContainer = document.getElementById('error');
+        
+        let names = [];
+        
+        // 이름 추가 함수
+        function addName() {
+            const name = nameInput.value.trim();
+            if (name && !names.includes(name)) {
+                names.push(name);
+                updateNamesDisplay();
+                nameInput.value = '';
+            } else if (names.includes(name)) {
+                showError('이미 추가된 이름입니다!');
+            }
+            nameInput.focus();
+        }
+        
+        // 이름 입력 후 엔터키 처리
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addName();
+            }
+        });
+        
+        // 이름 추가 버튼
+        addNameBtn.addEventListener('click', addName);
+        
+        // 이름 표시 업데이트
+        function updateNamesDisplay() {
+            namesContainer.innerHTML = '';
+            names.forEach((name, index) => {
+                const nameTag = document.createElement('div');
+                nameTag.className = 'name-tag';
+                nameTag.style.animationDelay = `${index * 0.05}s`;
+                
+                nameTag.textContent = name;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'x';
+                removeBtn.addEventListener('click', () => {
+                    names.splice(index, 1);
+                    updateNamesDisplay();
+                });
+                
+                nameTag.appendChild(removeBtn);
+                namesContainer.appendChild(nameTag);
+            });
+            
+            // 인원수 자동 업데이트
+            totalCountInput.value = names.length;
+        }
+        
+        // 자동 생성 버튼
+        autoGenerateBtn.addEventListener('click', function() {
+            const totalCount = parseInt(totalCountInput.value);
+            if (isNaN(totalCount) || totalCount < 2) {
+                showError('총 인원은 2명 이상이어야 합니다!');
+                return;
+            }
+            
+            names = [];
+            for (let i = 1; i <= totalCount; i++) {
+                names.push(`참가자 ${i}`);
+            }
+            updateNamesDisplay();
+        });
+        
+        // 팀 생성 버튼
+        generateTeamsBtn.addEventListener('click', function() {
+            const teamCount = parseInt(teamCountInput.value);
+            
+            if (names.length === 0) {
+                showError('참가자 이름을 입력하거나 자동 생성해주세요!');
+                return;
+            }
+            
+            if (isNaN(teamCount) || teamCount < 2 || teamCount > 10) {
+                showError('팀 개수는 2개 이상 10개 이하여야 합니다!');
+                return;
+            }
+            
+            if (teamCount > names.length) {
+                showError('팀 개수가 참가자 수보다 많을 수 없습니다!');
+                return;
+            }
+            
+            hideError();
+            createTeams(teamCount, [...names]);
+        });
+        
+        // 에러 표시
+        function showError(message) {
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+        }
+        
+        // 에러 숨김
+        function hideError() {
+            errorContainer.style.display = 'none';
+        }
+        
+        // 팀 생성 함수
+        function createTeams(teamCount, namesList) {
+            // 결과 컨테이너 비우기
+            resultContainer.innerHTML = '';
+            resultContainer.style.opacity = '1';
+            
+            // 로딩 상태 표시
+            const loadingText = document.createElement('div');
+            loadingText.textContent = '팀 구성 중...';
+            loadingText.style.fontSize = '24px';
+            loadingText.style.margin = '20px 0';
+            loadingText.style.color = '#FFD700';
+            loadingText.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+            resultContainer.appendChild(loadingText);
+            
+            setTimeout(() => {
+                resultContainer.removeChild(loadingText);
+            }, 800);
+            
+            // 이름 목록 섞기
+            shuffleArray(namesList);
+            
+            // 팀 컨테이너 먼저 생성
+            let teamElements = [];
+            for (let i = 0; i < teamCount; i++) {
+                const teamElement = document.createElement('div');
+                teamElement.className = 'team';
+                teamElement.style.animationDelay = `${i * 0.2}s`;
+                
+                const teamTitle = document.createElement('h2');
+                teamTitle.textContent = `${i + 1}팀`;
+                teamElement.appendChild(teamTitle);
+                
+                resultContainer.appendChild(teamElement);
+                teamElements.push(teamElement);
+            }
+            
+            // 진행 상황 표시를 위한 요소
+            const progressDiv = document.createElement('div');
+            progressDiv.style.position = 'fixed';
+            progressDiv.style.top = '10px';
+            progressDiv.style.left = '50%';
+            progressDiv.style.transform = 'translateX(-50%)';
+            progressDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            progressDiv.style.color = 'white';
+            progressDiv.style.padding = '8px 16px';
+            progressDiv.style.borderRadius = '20px';
+            progressDiv.style.fontSize = '14px';
+            progressDiv.style.zIndex = '1000';
+            document.body.appendChild(progressDiv);
+            
+            // 인원 배치를 위한 함수
+            function assignNextMember(index) {
+                if (index >= namesList.length) {
+                    // 모든 멤버 배치 완료
+                    document.body.removeChild(progressDiv);
+                    createConfetti();
+                    
+                    // 팀 구성 완료 표시
+                    const completeDiv = document.createElement('div');
+                    completeDiv.textContent = '✓ 팀 구성 완료!';
+                    completeDiv.style.color = '#4ECDC4';
+                    completeDiv.style.fontWeight = 'bold';
+                    completeDiv.style.fontSize = '20px';
+                    completeDiv.style.textAlign = 'center';
+                    completeDiv.style.margin = '20px 0';
+                    completeDiv.style.padding = '10px';
+                    completeDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    completeDiv.style.borderRadius = '10px';
+                    resultContainer.appendChild(completeDiv);
+                    return;
+                }
+                
+                // 진행 상황 업데이트
+                progressDiv.textContent = `진행 중: ${index + 1} / ${namesList.length} (${Math.round((index + 1) / namesList.length * 100)}%)`;
+                
+                
+                const name = namesList[index];
+                const teamIndex = index % teamCount;
+                const teamElement = teamElements[teamIndex];
+                
+                // 대기 중인 멤버 표시 (화면 중앙)
+                const waitingMember = document.createElement('div');
+                waitingMember.className = 'member';
+                waitingMember.textContent = name;
+                waitingMember.style.position = 'fixed';
+                waitingMember.style.top = '50%';
+                waitingMember.style.left = '50%';
+                waitingMember.style.transform = 'translate(-50%, -50%)';
+                waitingMember.style.zIndex = '100';
+                waitingMember.style.backgroundColor = 'rgba(255, 215, 0, 0.7)';
+                waitingMember.style.padding = '15px';
+                waitingMember.style.borderRadius = '10px';
+                waitingMember.style.fontSize = '20px';
+                waitingMember.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.5)';
+                document.body.appendChild(waitingMember);
+                
+                // 팀으로 이동하는 애니메이션
+                setTimeout(() => {
+                    // 팀 요소의 위치 계산
+                    const rect = teamElement.getBoundingClientRect();
+                    
+                    // 대상 팀 하이라이트
+                    teamElement.classList.add('highlight');
+                
+                    // 이동 애니메이션
+                    waitingMember.style.transition = 'all 0.8s ease-in-out';
+                    waitingMember.style.top = `${rect.top + 80}px`;
+                    waitingMember.style.left = `${rect.left + rect.width/2}px`;
+                    waitingMember.style.transform = 'translate(-50%, 0)';
+                    waitingMember.style.opacity = '0.7';
+                    
+                    setTimeout(() => {
+                        // 대기 멤버 요소 제거
+                        document.body.removeChild(waitingMember);
+                        
+                        // 하이라이트 제거
+                        teamElement.classList.remove('highlight');
+                        
+                        // 실제 팀에 멤버 추가
+                        const memberElement = document.createElement('div');
+                        memberElement.className = 'member visible-member';
+                        memberElement.textContent = name;
+                        memberElement.style.animation = 'pop 0.3s forwards';
+                        teamElement.appendChild(memberElement);
+                        
+                        // 멤버 추가 효과음 재생
+                        playSound(200 + (index % 5) * 100);
+                        
+                        // 다음 멤버 할당
+                        setTimeout(() => {
+                            assignNextMember(index + 1);
+                        }, 150);
+                    }, 800);
+                }, 400);
+            }
+            
+            // 첫 번째 멤버부터 배치 시작
+            setTimeout(() => {
+                assignNextMember(0);
+            }, 1000);
+        }
+        
+        // 배열 섞기 (Fisher-Yates 알고리즘)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 색상 랜덤 생성
+        function getRandomColor() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFD700', '#A6D9F7', '#FF8C00', '#7FDBFF', '#FF69B4', '#ADFF2F'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // 컨페티 생성
+        function createConfetti() {
+            const confettiCount = 100;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // 랜덤 위치, 크기, 색상
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.backgroundColor = getRandomColor();
+                
+                // 랜덤 애니메이션 속성
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confetti.style.animationDelay = `${Math.random() * 5}s`;
+                
+                document.body.appendChild(confetti);
+                
+                // 애니메이션 완료 후 제거
+                setTimeout(() => {
+                    confetti.remove();
+                }, 7000);
+            }
+            
+            // 완료 사운드 재생
+            playSound(600);
+            setTimeout(() => playSound(800), 200);
+            setTimeout(() => playSound(1000), 400);
+        }
+        
+        // 간단한 효과음 재생
+        function playSound(freq) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = freq;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 500);
+            } catch (e) {
+                console.log('오디오 재생 오류:', e);
+            }
+        }
+    </script>
+</body>
+</html>
